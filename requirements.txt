@@ -1,0 +1,24 @@
+cffi @ file:///Users/runner/miniforge3/conda-bld/cffi_1671179421243/work
+cfgv @ file:///home/conda/feedstock_root/build_artifacts/cfgv_1629909281805/work
+cftime @ file:///Users/runner/miniforge3/conda-bld/cftime_1666834050535/work
+distlib @ file:///home/conda/feedstock_root/build_artifacts/distlib_1668356257807/work
+-e git+https://github.com/Ash12H/dymfile.git@dcd40e640990f8fe122d1a5365d8a1b67864b739#egg=dymfile
+filelock @ file:///home/conda/feedstock_root/build_artifacts/filelock_1681839547898/work
+identify @ file:///home/conda/feedstock_root/build_artifacts/identify_1683153699653/work
+netCDF4 @ file:///Users/runner/miniforge3/conda-bld/netcdf4_1678982457677/work
+nodeenv @ file:///home/conda/feedstock_root/build_artifacts/nodeenv_1683892983968/work
+numpy @ file:///Users/runner/miniforge3/conda-bld/numpy_1682210472725/work
+packaging @ file:///home/conda/feedstock_root/build_artifacts/packaging_1681337016113/work
+pandas @ file:///Users/runner/miniforge3/conda-bld/pandas_1685343120939/work
+platformdirs @ file:///home/conda/feedstock_root/build_artifacts/platformdirs_1683850015520/work
+pre-commit @ file:///home/conda/feedstock_root/build_artifacts/pre-commit_1684371526775/work
+pycparser @ file:///home/conda/feedstock_root/build_artifacts/pycparser_1636257122734/work
+python-dateutil @ file:///home/conda/feedstock_root/build_artifacts/python-dateutil_1626286286081/work
+pytz @ file:///home/conda/feedstock_root/build_artifacts/pytz_1680088766131/work
+PyYAML @ file:///Users/runner/miniforge3/conda-bld/pyyaml_1666772688941/work
+six @ file:///home/conda/feedstock_root/build_artifacts/six_1620240208055/work
+typing_extensions @ file:///home/conda/feedstock_root/build_artifacts/typing_extensions_1685045523825/work
+tzdata @ file:///home/conda/feedstock_root/build_artifacts/python-tzdata_1680081134351/work
+ukkonen @ file:///Users/runner/miniforge3/conda-bld/ukkonen_1666949192291/work
+virtualenv @ file:///home/conda/feedstock_root/build_artifacts/virtualenv_1682674264573/work
+xarray @ file:///home/conda/feedstock_root/build_artifacts/xarray_1684536552446/work
