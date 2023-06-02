@@ -39,32 +39,6 @@ To export your environment use :
 pip freeze > requirements.txt
 ```
 
-## Install the project as a developper
-
-> It is highly recommended to create a virtual environment first.
->
-> Warning : Following command must be wrote at the project root.
-
-Install :
-
-```bash
-pip install -e .
-```
-
-Uninstall :
-
-```bash
-pip uninstall .
-```
-
-## Scripts
-
-Now you can call scripts like this :
-
-```bash
-dymtonetcdf.py <...>
-```
-
 ## Test
 
 You will need the `unittest` package to run unit test.
@@ -78,3 +52,11 @@ python -m unittest discover -s <directory>
 
 python -m unittest discover -p <pattern> 
 ```
+
+## Github actions
+
+Every time you will push your commit on the github repository, different workflows will be executed on serveurs.
+
+- Lint : Black
+- Lint : Flake8
+- Test : Pytest

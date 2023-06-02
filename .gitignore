@@ -1,6 +1,14 @@
-.DS_Store
+# User folders
+build
 data/*
+
+# Python system
 __pycache__
 *.egg-info*
+
+# Mac
+.DS_Store
+
+# Virtual environment
 .venv
-build
+.conda
