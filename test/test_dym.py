@@ -2,7 +2,7 @@ import logging
 import os
 import unittest
 
-from dymfiles.core.dym import get_file_format
+from dymfile.core.dym import get_file_format
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 ABSOLUTE_PATH_TO_TEST_DATA = os.path.join(THIS_DIR, "test_dym/")

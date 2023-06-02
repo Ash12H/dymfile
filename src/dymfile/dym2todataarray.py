@@ -7,7 +7,7 @@ from typing import Any, Dict, Optional
 import numpy as np
 import xarray as xr
 
-from dymfiles.core import dym2, utilities
+from dymfile.core import dym2, utilities
 
 
 def dym2_to_data_array(

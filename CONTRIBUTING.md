@@ -8,7 +8,7 @@
 Use pre-commit before submitting Pull Request. ([link](https://ljvmiranda921.github.io/notebook/2018/06/21/precommits-using-black-and-flake8/)).
 
 ```bash
-conda install pre-commit
+pip install pre-commit
 pre-commit install
 ```
 
@@ -18,39 +18,13 @@ pre-commit install
 
 Links [here](https://stackoverflow.com/questions/48787250/set-up-virtualenv-using-a-requirements-txt-generated-by-conda).
 
-### Anaconda environment
-
-To manage virtual environment with anaconda, use the `environment.yml` file as follow :
-
-```bash
-conda env create -f environment.yml
-```
-
-To export your environment use :
-
-```bash
-conda env export > environment.yml
-```
-
-You can also use the `requirement.txt` as follow :
-
-```bash
-conda create --name <env_name> --file requirements.txt
-```
-
-And if pip is installed on your conda environment you can export for pip user as follow :
-
-```bash
-pip freeze > requirements.txt
-```
-
 ### Pip environment
 
 Create your environment using `venv` :
 
 ```bash
-python3 -m venv <env_name>
-source ./<env_name>/bin/activate
+python3 -m venv .venv
+source ./.venv/bin/activate
 ```
 
 To manage virtual environment with Pip, use the `requirement.txt` file as follow :
@@ -68,13 +42,7 @@ pip freeze > requirements.txt
 ## Install the project as a developper
 
 > It is highly recommended to create a virtual environment first.
-
-### Anaconda
-
-Use the pip package include in the anaconda distribution.
-
-### Pip
-
+>
 > Warning : Following command must be wrote at the project root.
 
 Install :
@@ -94,7 +62,7 @@ pip uninstall .
 Now you can call scripts like this :
 
 ```bash
-python -m dymfiles.script.dymtonetcdf
+dymtonetcdf.py <...>
 ```
 
 ## Test
