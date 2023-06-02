@@ -5,7 +5,10 @@ if __name__ == "__main__":
         name="dymfile",
         author="Jules Lehodey",
         version="0.1",
-        packages=["dymfile"],
-        package_dir={"dymfile": "src/dymfile"},
+        package=["dymfile", "dymfile.code"],
+        packages_dir={
+            "dymfile": "src/dymfile",
+            "dymfile.core": "src/dymfile/core",
+        },
         scripts=["src/dymfile/scripts/dymtonetcdf.py"],
     )
