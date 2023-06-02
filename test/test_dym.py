@@ -1,9 +1,11 @@
 import logging
 import os
+import sys
 import unittest
 
 from dymfile.core.dym import get_file_format
 
+sys.path.insert(0, ".")
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 ABSOLUTE_PATH_TO_TEST_DATA = os.path.join(THIS_DIR, "test_dym/")
 
