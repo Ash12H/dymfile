@@ -1,7 +1,7 @@
 import unittest
 import logging
 
-from dymfiles.core.utilities import date_dym2tostr
+from dymfile.core.utilities import date_dym2tostr
 
 
 class Test_utilities(unittest.TestCase):

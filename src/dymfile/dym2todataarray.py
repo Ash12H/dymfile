@@ -7,7 +7,7 @@ from typing import Any, Dict, Optional
 import numpy as np
 import xarray as xr
 
-from dymfiles.core import dym2, utilities
+from dymfile.core import dym2, utilities
 
 
 def dym2_to_data_array(
@@ -53,8 +53,8 @@ def dym2_to_data_array(
 
     dym_file = dym2.DymFile(infilepath)
 
-    longitude_vector = dym_file.header_.xLon_[:, 0]
-    latitude_vector = dym_file.header_.yLat_[0, :]
+    longitude_vec = dym_file.header_.xLon_[:, 0]
+    latitude_vec = dym_file.header_.yLat_[0, :]
     n_time = dym_file.header_.nLev_
 
     dict_time = dict(standard_name="time")
@@ -84,8 +84,8 @@ def dym2_to_data_array(
                 np.array(grouped_datestr, dtype="datetime64[D]"),
                 dict_time,
             ),
-            "lat": ("lat", latitude_vector, dict_lat),
-            "lon": ("lon", longitude_vector, dict_lon),
+            "lat": ("lat", latitude_vec, dict_lat),
+            "lon": ("lon", longitude_vec, dict_lon),
         },
         attrs=attributs,
     )

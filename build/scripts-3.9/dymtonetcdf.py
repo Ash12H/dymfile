@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!python
 """
 A script which convert a DYM file into a NetCDF.
 
@@ -9,7 +9,7 @@ import argparse
 import logging
 import time
 
-from dymfiles.dym2todataarray import dym2_to_data_array
+from dymfile.dym2todataarray import dym2_to_data_array
 
 
 def set_verbose(verbose: bool) -> None:

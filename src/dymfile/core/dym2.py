@@ -7,7 +7,7 @@ import os
 
 import numpy as np
 
-from dymfiles.core import dym
+from dymfile.core import dym
 
 
 class DymFileHeader(dym.DymFileHeader):
