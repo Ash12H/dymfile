@@ -18,6 +18,14 @@ pre-commit install
 
 Links [here](https://stackoverflow.com/questions/48787250/set-up-virtualenv-using-a-requirements-txt-generated-by-conda).
 
+### Anaconda environment
+
+Export :
+
+```bash
+conda env export --no-builds > environment.yml
+```
+
 ### Pip environment
 
 Create your environment using `venv` :
@@ -36,7 +44,7 @@ pip install -r requirements.txt
 To export your environment use :
 
 ```bash
-pip freeze > requirements.txt
+pip list --format=freeze > requirements.txt
 ```
 
 ## Test
