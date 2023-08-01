@@ -88,4 +88,4 @@ def dym2_to_data_array(
             "lon": ("lon", longitude_vec, dict_lon),
         },
         attrs=attributs,
-    )
+    ).sortby(["time", "lat", "lon"])
