@@ -11,4 +11,12 @@ if __name__ == "__main__":
             "dymfile.core": "src/dymfile/core",
         },
         scripts=["src/dymfile/scripts/dymtonetcdf.py"],
+        install_requires=[
+            "numpy",
+            "netCDF4",
+            "xarray",
+            "plotly",
+            "ipykernel",
+            "matplotlib",
+        ],
     )
