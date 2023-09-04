@@ -13,7 +13,8 @@ FILVAL = 1e34
 
 def date_dym2tostr(dym2date: float) -> str:
     """
-    Convert a float representation of a date in dym2 format to a string in YYYYMMDD format.
+    Convert a float representation of a date in dym2 format to a string in YYYYMMDD
+    format.
 
     Parameters
     ----------
@@ -23,8 +24,8 @@ def date_dym2tostr(dym2date: float) -> str:
     Returns
     -------
     str
-        A string representation of the date in YYYYMMDD format. If an exception occurs during
-        the conversion, returns "xxxxxxxx".
+        A string representation of the date in YYYYMMDD format. If an exception occurs
+        during the conversion, returns "xxxxxxxx".
 
     Notes
     -----
@@ -39,7 +40,8 @@ def date_dym2tostr(dym2date: float) -> str:
 
     try:
         # ! WARNING Jules : if dym2date is "2022.0" then days is 0 and
-        # ! datetime.timedelta(days - 1) is -1. In that case 2022 is converted to 2021-12-31
+        # ! datetime.timedelta(days - 1) is -1. In that case 2022 is converted to
+        # ! 2021-12-31
         date = datetime.datetime(year, 1, 1) + datetime.timedelta(days - 1)
         return date.strftime("%Y%m%d")
     except Exception as e:

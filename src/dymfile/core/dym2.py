@@ -74,8 +74,8 @@ class DymFileHeader(dym.DymFileHeader):
         - A 4-byte string specifying the file format.
         - An integer specifying the function ID.
         - Two floating point values representing the minimum and maximum values.
-        - Three integers representing the number of longitude points, latitude points, and
-        vertical levels, respectively.
+        - Three integers representing the number of longitude points, latitude points,
+        and vertical levels, respectively.
         - Two floating point values representing the first and last dates.
         - Data for the longitude, latitude, vertical level, and mask variables, each
         represented as an array of floating point or integer values.
@@ -107,9 +107,7 @@ class DymFileHeader(dym.DymFileHeader):
             with open(self.fileName_, "rb") as fo:
                 _extract_headers_values(self, fo)
         except IOError as e:
-            logging.error(
-                f"read_header fails to read {e.fileName_}", exc_info=True
-            )
+            logging.error(f"read_header fails to read {e.fileName_}", exc_info=True)
             raise RuntimeError
         except Exception as e:
             logging.error(f"Header fails. Exception {e}", exc_info=True)

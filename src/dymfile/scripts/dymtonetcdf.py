@@ -2,7 +2,8 @@
 """
 A script which convert a DYM file into a NetCDF.
 
-Usage: dymtonetcdf.py -i ./my_dym_file.dym -v my_variable_name -./new_netcdf_file.nc -a unit="meter" origin="country_X"
+Usage: dymtonetcdf.py -i ./my_dym_file.dym -v my_variable_name -./new_netcdf_file.nc -a
+    unit="meter" origin="country_X"
 """
 
 import argparse
@@ -23,9 +24,7 @@ def set_verbose(verbose: bool) -> None:
     """
     if verbose:
         fmt = "%(asctime)s - %(filename)s - %(levelname)s - %(message)s"
-        logging.basicConfig(
-            format=fmt, level=logging.DEBUG, datefmt="%Y-%m-%d %H:%M:%S"
-        )
+        logging.basicConfig(format=fmt, level=logging.DEBUG, datefmt="%Y-%m-%d %H:%M:%S")
         logging.Formatter.converter = time.gmtime
 
 
@@ -40,18 +39,14 @@ def usage() -> argparse.Namespace:
         prog=__file__, description=descr, formatter_class=fc
     )
 
-    parser.add_argument(
-        "--silent", "-s", help="Silent mode", action="store_true"
-    )
+    parser.add_argument("--silent", "-s", help="Silent mode", action="store_true")
     parser.add_argument(
         "--infilepath",
         "-i",
         help="The path to the dymfile to convert",
         required=True,
     )
-    parser.add_argument(
-        "--varname", "-v", help="The variable name", required=True
-    )
+    parser.add_argument("--varname", "-v", help="The variable name", required=True)
     parser.add_argument(
         "--outfilepath",
         "-o",
@@ -62,7 +57,10 @@ def usage() -> argparse.Namespace:
         "--attributs",
         "-a",
         nargs="*",
-        help='List of attributs you want to add to the netdcf file. Format is : attribut_name="attribut content"',
+        help=(
+            "List of attributs you want to add to the netdcf file. Format is : "
+            'attribut_name="attribut content"'
+        ),
         required=False,
     )
 
@@ -81,9 +79,7 @@ def main() -> None:
     outfilepath = args.outfilepath
     attributs = None
     if args.attributs is not None:
-        attributs = dict(
-            data.split("=", maxsplit=1) for data in args.attributs
-        )
+        attributs = dict(data.split("=", maxsplit=1) for data in args.attributs)
 
     dataarray = dym2_to_data_array(
         infilepath=infilepath, varname=varname, attributs=attributs

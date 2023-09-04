@@ -66,9 +66,7 @@ def get_file_format(filename: str) -> str:
     IdFormat = fo.read(4).decode("utf-8")
     fo.close()
     if IdFormat != "DYM3":
-        logging.warning(
-            f"{filename}: data file in dymz archive: unknown format."
-        )
+        logging.warning(f"{filename}: data file in dymz archive: unknown format.")
         return unknown
 
     fo = zfile.open(meta, "r")
@@ -205,7 +203,8 @@ class DymFile:
         Raises
         ------
         RuntimeError
-            If no file format is selected and the file does not exist, or if the dymformat is not consistent with the file format.
+            If no file format is selected and the file does not exist, or if the
+            dymformat is not consistent with the file format.
 
         """
 
@@ -215,7 +214,8 @@ class DymFile:
             idformat = get_file_format(filename)
             if dymformat is not None and dymformat != idformat:
                 raise RuntimeError(
-                    f"{self.fileName_}: dymformat is not consistent with file format. Expected format: {dymformat}. Found format: {idformat}."
+                    f"{self.fileName_}: dymformat is not consistent with file format. "
+                    f"Expected format: {dymformat}. Found format: {idformat}."
                 )
             self.format_ = idformat
 

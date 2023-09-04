@@ -1,3 +1,6 @@
 numpy
 netCDF4
 xarray
+plotly
+ipykernel
+matplotlib
