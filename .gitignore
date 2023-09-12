@@ -1,6 +1,7 @@
 # User folders
 build
 data/*
+notebook
 
 # Python system
 __pycache__

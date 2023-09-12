@@ -1,6 +1,4 @@
-"""
-TODO : Describe
-"""
+"""TODO : Describe."""
 import os
 from typing import Any, Dict, Optional
 
@@ -47,9 +45,9 @@ def dym2_to_data_array(
         da = dym2_to_data_array('path/to/file.dym', 'my_data_array')
         ```
     """
-
     if not os.path.exists(infilepath):
-        raise ValueError(f"File not found: {infilepath}")
+        msg = f"File not found: {infilepath}"
+        raise ValueError(msg)
 
     dym_file = dym2.DymFile(infilepath)
 
@@ -57,9 +55,9 @@ def dym2_to_data_array(
     latitude_vec = dym_file.header_.yLat_[0, :]
     n_time = dym_file.header_.nLev_
 
-    dict_time = dict(standard_name="time")
-    dict_lat = dict(standard_name="latitude", units="degrees_north")
-    dict_lon = dict(standard_name="longitude", units="degrees_east")
+    dict_time = {"standard_name": "time"}
+    dict_lat = {"standard_name": "latitude", "units": "degrees_north"}
+    dict_lon = {"standard_name": "longitude", "units": "degrees_east"}
 
     grouped_outdata = []
     grouped_datestr = []

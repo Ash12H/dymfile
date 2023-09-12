@@ -1,6 +1,4 @@
-"""
-TODO : Describe
-"""
+"""TODO : Describe."""
 
 import calendar
 import datetime
@@ -33,7 +31,8 @@ def date_dym2tostr(dym2date: float) -> str:
     decimal part represents the day of the year.
     """
     if not isinstance(dym2date, (np.floating, float)):
-        raise TypeError(f"dym2date expect a float but is a {type(dym2date)}.")
+        msg = f"dym2date expect a float but is a {type(dym2date)}."
+        raise TypeError(msg)
     year = int(dym2date)
     daysinyear = 366 if calendar.isleap(year) else 365
     days = round((dym2date - year) * daysinyear)

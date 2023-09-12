@@ -1,21 +1,57 @@
+# sourcery skip: require-return-annotation
+"""Tool functions."""
+
 from __future__ import annotations
-import numpy as np
-from dataclasses import dataclass
+
 import datetime
 import itertools
-import io
-import xarray as xr
 import struct
+from collections import Counter
+from typing import TYPE_CHECKING, Any, Iterable
+
+import cartopy.crs as ccrs
+import numpy as np
+
+if TYPE_CHECKING:
+    import io
+
+    import xarray as xr
 
 
-def _get_date_sea(ndat):
+def get_date_sea(ndat: float) -> datetime.date:
+    """
+    Calculate the date in Seapodym format. Integer part is year and floating part is day
+    of the year.
+
+    Parameters
+    ----------
+    ndat : float
+        The input date in Seapodym format.
+
+    Returns
+    -------
+    datetime.date
+        The calculated date in datetime.date format.
+    """
     year = int(ndat)
     days = int((ndat - year) * 365)
-    date = datetime.date(year, 1, 1) + datetime.timedelta(days=days - 1)
-    return date
+    return datetime.date(year, 1, 1) + datetime.timedelta(days=days - 1)
 
 
-def _year_month_sea(ndat):
+def year_month_sea(ndat: float) -> list[int]:
+    """
+    Calculate the date in Seapodym format. Return year and month in a list.
+
+    Parameters
+    ----------
+    ndat : float
+        The input date in Seapodym format.
+
+    Returns
+    -------
+    list[int]
+        A list containing the year and month.
+    """
     year = int(ndat)
     days = int((ndat - year) * 365)
     date = datetime.date(year, 1, 1) + datetime.timedelta(days=days - 1)
@@ -23,7 +59,22 @@ def _year_month_sea(ndat):
     return [year, month]
 
 
-def _gen_monthly_dates(t0, tfin):
+def gen_monthly_dates(t0: list[int], tfin: list[int]) -> np.ndarray:
+    """
+    Generate monthly dates between t0 and tfin.
+
+    Parameters
+    ----------
+    t0 : list[int]
+        The start date [year, month].
+    tfin : list[int]
+        The end date [year, month].
+
+    Returns
+    -------
+    np.ndarray
+        An array of monthly dates.
+    """
     dates = [
         datetime.date(year, month, 15)
         for year, month in itertools.product(
@@ -33,133 +84,110 @@ def _gen_monthly_dates(t0, tfin):
     return np.array(dates, dtype="datetime64")
 
 
-def _iter_unpack_numbers(
-    format: str, buffer: io.BufferedReader | io.BytesIO
+def iter_unpack_numbers(
+    buf_format: str, buffer: io.BufferedReader | io.BytesIO
 ) -> np.ndarray:
-    result = struct.iter_unpack(format, buffer)
+    """
+    Unpack numbers from a binary buffer using the specified format.
+
+    Parameters
+    ----------
+    buf_format : str
+        The format string.
+    buffer : io.BufferedReader | io.BytesIO
+        The binary buffer to unpack from.
+
+    Returns
+    -------
+    np.ndarray
+        An array of unpacked numbers.
+    """
+    result = struct.iter_unpack(buf_format, buffer)
     return np.array([x[0] for x in result])
 
 
-@dataclass
-class HeaderData:
-    nlon: int
-    nlat: int
-    nlevel: int
-    t0_file: float
-    tfin_file: float
+def normalize_longitude(data: xr.DataArray) -> xr.DataArray:
+    """
+    Normalizes the longitude values in the given DataArray.
+    Longitude will be inside [-180, 180] degrees.
+
+    Parameters
+    ----------
+    data : xr.DataArray
+        The DataArray containing longitude values.
+
+    Returns
+    -------
+    xr.DataArray
+        The DataArray with normalized longitude values.
+    """
+    data = data.assign_coords(lon=(((data.lon + 180) % 360) - 180))
+    return data.sortby(list(data.coords.keys()))
 
 
-def read_header(
-    file: io.BufferedReader | io.BytesIO,
-) -> tuple[HeaderData, np.ndarray, np.ndarray]:
-    """Read informations in the Dymfile header."""
-    file.read(4)
-    struct.unpack("i", file.read(4))
-    struct.unpack("f", file.read(4))
-    struct.unpack("f", file.read(4))
+def find_resolution(array: Iterable) -> float:
+    """
+    Finds the most common difference between consecutive elements in the given array.
 
-    nlon = struct.unpack("i", file.read(4))[0]
-    nlat = struct.unpack("i", file.read(4))[0]
-    nlevel = struct.unpack("i", file.read(4))[0]
-    t0_file = struct.unpack("f", file.read(4))[0]
-    tfin_file = struct.unpack("f", file.read(4))[0]
+    Parameters
+    ----------
+    array : Iterable
+        The input array.
 
-    header_data = HeaderData(nlon, nlat, nlevel, t0_file, tfin_file)
-    xlon = np.zeros((header_data.nlat, header_data.nlon), dtype=np.float32)
-    ylat = np.zeros((header_data.nlat, header_data.nlon), dtype=np.float32)
-
-    return header_data, xlon, ylat
-
-
-def init_data(
-    file: io.BufferedReader | io.BytesIO,
-    header_data: HeaderData,
-    xlon: np.ndarray,
-    ylat: np.ndarray,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """Initialize coordinates and mask."""
-    for i in range(header_data.nlat):
-        xlon[i, :] = _iter_unpack_numbers("f", file.read(4 * header_data.nlon))
-    for i in range(header_data.nlat):
-        ylat[i, :] = _iter_unpack_numbers("f", file.read(4 * header_data.nlon))
-    time_vect = _iter_unpack_numbers("f", file.read(4 * header_data.nlevel))
-    mask = np.zeros((header_data.nlat, header_data.nlon), dtype=np.int32)
-    for i in range(header_data.nlat):
-        mask[i, :] = _iter_unpack_numbers("i", file.read(4 * header_data.nlon))
-    return xlon, ylat, time_vect, mask
+    Returns
+    -------
+    float
+        The most common difference between consecutive elements in the array.
+        Returns None if the array is empty.
+    """
+    differences = [array[i + 1] - array[i] for i in range(len(array) - 1)]
+    difference_counts = Counter(differences)
+    most_common_difference = difference_counts.most_common(1)
+    return most_common_difference[0][0] if most_common_difference else None
 
 
-def fill_data(
-    file: io.BufferedReader | io.BytesIO,
-    header_data: HeaderData,
-) -> np.ndarray:
-    """Fill the data array."""
-    data = np.zeros(
-        (header_data.nlevel, header_data.nlat, header_data.nlon),
-        dtype=np.float32,
+# return type is Any due to the many different possibilities
+def plot(data: xr.DataArray, projection: ccrs.Projection = None) -> Any:
+    """Plots the data contained in the Dymfile as a quadmesh plot."""
+    if projection is None:
+        projection = ccrs.PlateCarree(central_longitude=0)
+    res = find_resolution(data.lon.data)
+    reindexed_data = data.reindex(lon=np.arange(data.lon[0], data.lon[-1] + res, res))
+    return reindexed_data.hvplot.quadmesh(
+        x="lon",
+        y="lat",
+        geo=True,
+        cmap="viridis",
+        coastline=True,
+        widget_location="bottom",
+        projection=projection,
     )
-    iterator = itertools.product(range(header_data.nlevel), range(header_data.nlat))
-    for time, lat in iterator:
-        result = struct.iter_unpack("f", file.read(4 * header_data.nlon))
-        data[time, lat, :] = np.array([x[0] for x in result])
-    # Convert invalid values in DYM to NA
-    data[data == -999] = np.nan
+
+
+def generate_coordinates_attrs(data: xr.DataArray) -> xr.DataArray:
+    """Generate the coordinates attributes for the data array."""
+    data.coords["lon"] = data.lon.assign_attrs(
+        standard_name="longitude",
+        long_name="longitude",
+        units="degrees_east",
+    )
+    data.coords["lat"] = data.lat.assign_attrs(
+        standard_name="latitude",
+        long_name="latitude",
+        units="degrees_north",
+    )
     return data
 
 
-def format_date(delta_time: int, header_data: HeaderData) -> np.ndarray:
-    """Transform the date (float) into datetime format."""
-    if delta_time == 30:
-        dates = _gen_monthly_dates(
-            _year_month_sea(header_data.t0_file),
-            _year_month_sea(header_data.tfin_file),
-        )
-    else:
-        dates = _get_date_sea(header_data.t0_file) + np.arange(
-            0, header_data.nlevel * delta_time, delta_time
-        )
-    return np.array(dates, dtype="datetime64")
-
-
-def loading(
-    file: io.BufferedReader | io.BytesIO,
-    *,
-    date_formating: bool = True,
-    delta_time: int = 30,
-):
-    """Wrapper function. Load all the data into numpy format."""
-    header_data, xlon, ylat = read_header(file)
-    xlon, ylat, time_vector, mask = init_data(file, header_data, xlon, ylat)
-    if date_formating:
-        time_vector = format_date(delta_time, header_data)
-    data = fill_data(file, header_data)
-
-    return data, mask, time_vector, xlon, ylat
-
-
-def format_data(data, mask, time_vector, xlon, ylat):
-    """Transform the numpy data into Xarray format."""
-    ylat = ylat[:, 0]
-    xlon = xlon[0, :]
-
-    mask = xr.DataArray(
-        mask,
-        dims=("lat", "lon"),
-        coords={"lat": ylat, "lon": xlon},
-        name="mask",
-    )
-    data = xr.DataArray(
-        data,
-        dims=("time", "lat", "lon"),
-        coords={
-            "time": time_vector,
-            "lat": ylat,
-            "lon": xlon,
-        },
-    )
-    data = xr.where(mask == 0, np.NAN, data)
-    data = data.transpose("time", "lat", "lon")
-    data = data.sortby(["time", "lat", "lon"])
-    mask = mask.sortby(["lat", "lon"])
-
-    return data, mask
+def generate_name(
+    data: xr.DataArray, name: str, units: str | None = None
+) -> xr.DataArray:
+    """Generate the name attributes for the data array."""
+    attrs = {
+        "standard_name": name,
+        "long_name": name,
+    }
+    if units is not None:
+        attrs["units"] = units
+    data.attrs.update(attrs)
+    return data

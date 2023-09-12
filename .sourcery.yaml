@@ -21,6 +21,7 @@ ignore: # A list of paths or files which Sourcery will ignore.
 - node_modules
 - vendor
 - test
+- ./*.ipynb
 - __init__.py
 - setup.py
 

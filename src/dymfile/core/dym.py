@@ -1,6 +1,4 @@
-"""
-TODO : Describe
-"""
+"""TODO : Describe."""
 
 import logging
 import os
@@ -13,19 +11,18 @@ import numpy as np
 
 def get_file_format(filename: str) -> str:
     """
-    Get DYM file format
+    Get DYM file format.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     filename : str
         file name
 
-    Returns:
-    --------
+    Returns
+    -------
     str
         file format in ["DYM2","DYM3","DYMZ","UNKNOWN"]
     """
-
     unknown = "UNKNOWN"
     with open(filename, "rb") as fo:
         IdFormat = fo.read(4).decode("utf-8")
@@ -47,7 +44,7 @@ def get_file_format(filename: str) -> str:
         return unknown
 
     try:
-        meta = [a for a in list_of_files if a[-3:] == "xml"][0]
+        meta = next(a for a in list_of_files if a[-3:] == "xml")
     except Exception as e:
         logging.warning(
             f"{filename}: no meta file found in zip archive. exception : {e}"
@@ -55,7 +52,7 @@ def get_file_format(filename: str) -> str:
         return unknown
 
     try:
-        data = [a for a in list_of_files if ".dym" in a][0]
+        data = next(a for a in list_of_files if ".dym" in a)
     except Exception as e:
         logging.warning(
             f"{filename}: no data file found in zip archive. Exception : {e}"
@@ -86,7 +83,8 @@ def get_file_format(filename: str) -> str:
 
 
 class DymFileHeader:
-    """Header d'un fichier DYM.
+    """
+    Header d'un fichier DYM.
 
     Attributes
     ----------
@@ -114,7 +112,8 @@ class DymFileHeader:
     """
 
     def __init__(self, filename: str, idformat: int) -> None:
-        """Initialise une instance de la classe DymFileHeader.
+        """
+        Initialise une instance de la classe DymFileHeader.
 
         Parameters
         ----------
@@ -207,20 +206,18 @@ class DymFile:
             dymformat is not consistent with the file format.
 
         """
-
         self.fileName_ = filename
 
         if os.path.exists(filename):
             idformat = get_file_format(filename)
             if dymformat is not None and dymformat != idformat:
-                raise RuntimeError(
-                    f"{self.fileName_}: dymformat is not consistent with file format. "
-                    f"Expected format: {dymformat}. Found format: {idformat}."
-                )
+                msg = f"{self.fileName_}: dymformat is not consistent with file format. Expected format: {dymformat}. Found format: {idformat}."
+                raise RuntimeError(msg)
             self.format_ = idformat
 
         elif dymformat is None:
-            raise RuntimeError("No file format selected.")
+            msg = "No file format selected."
+            raise RuntimeError(msg)
         else:
             self.format_ = dymformat
         self.dataFile_ = None
@@ -258,7 +255,8 @@ class DymFile:
             If the data file does not exist.
         """
         if not os.path.exists(self.dataFile_):
-            raise IOError(f"{self.dataFile_}: no such file.")
+            msg = f"{self.dataFile_}: no such file."
+            raise OSError(msg)
 
         blocsize = self.data_block_size()
 

@@ -24,15 +24,14 @@ def set_verbose(verbose: bool) -> None:
     """
     if verbose:
         fmt = "%(asctime)s - %(filename)s - %(levelname)s - %(message)s"
-        logging.basicConfig(format=fmt, level=logging.DEBUG, datefmt="%Y-%m-%d %H:%M:%S")
+        logging.basicConfig(
+            format=fmt, level=logging.DEBUG, datefmt="%Y-%m-%d %H:%M:%S"
+        )
         logging.Formatter.converter = time.gmtime
 
 
 def usage() -> argparse.Namespace:
-    """
-    Program syntax
-    """
-
+    """Program syntax."""
     descr = "Convert a Dymfile into a netcdf file "
     fc = argparse.ArgumentDefaultsHelpFormatter
     parser = argparse.ArgumentParser(
@@ -68,8 +67,10 @@ def usage() -> argparse.Namespace:
 
 
 def main() -> None:
-    """Main function used by the script. Check argument then execute
-    `dym2_to_data_array` function and save created file."""
+    """
+    Main function used by the script. Check argument then execute
+    `dym2_to_data_array` function and save created file.
+    """
     args = usage()
 
     set_verbose(not args.silent)

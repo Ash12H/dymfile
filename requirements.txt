@@ -1,6 +1,9 @@
 numpy
 netCDF4
 xarray
-plotly
 ipykernel
 matplotlib
+cartopy
+hvplot
+geoviews
+jupyter_bokeh

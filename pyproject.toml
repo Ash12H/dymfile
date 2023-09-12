@@ -1,5 +1,7 @@
+# LINT SECTION
+
 [tool.black]
-line-length = 89
+line-length = 88
 include = '\.pyi?$'
 exclude = '''
 /(
@@ -7,6 +9,37 @@ exclude = '''
 )/
 '''
 
+[tool.ruff]
+select = [
+    "E","F","W","C90","I","N","D","UP","YTT","ANN","ASYNC",
+    "S","BLE","FBT","B","A","COM","C4","DTZ","T10","DJ","EM",
+    "EXE","FA","ISC","ICN","G","INP","PIE","T20","PYI","PT",
+    "Q","RSE","RET","SLF","SIM","TID","TCH","INT","ARG","PTH",
+    "TD","ERA","PD","PGH","PLC","PLE","PLR","PLW","TRY","FLY",
+    "NPY","AIR","RUF", "UP007", "B905", 
+]
+
+# Since xarray use .isnull function Rule PD004 cannot be used
+ignore = ["D212", "D203", "D401", "D205", "COM812","S314", "PD004", "ANN401"]
+line-length = 88
+exclude = [
+    ".eggs",
+    ".git",
+    ".venv",
+    "__pypackages__",
+    "build",
+    "test",
+    "__init__.py",
+    "setup.py"
+]
+[tool.ruff.mccabe]
+# Unlike Flake8, default to a complexity level of 10.
+max-complexity = 10
+[tool.ruff.pylint]
+# 5 is too restrictive for class initialization
+max-args = 7
+
+# SYSTEM SECTION
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"

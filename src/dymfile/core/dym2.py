@@ -1,6 +1,4 @@
-"""
-TODO : Describe
-"""
+"""TODO : Describe."""
 
 import logging
 import os
@@ -11,21 +9,19 @@ from dymfile.core import dym
 
 
 class DymFileHeader(dym.DymFileHeader):
-    """
-    TODO : Describe
-    """
+    """TODO : Describe."""
 
-    def __init__(self, filename):
+    def __init__(self, filename) -> None:
         """
         Initializes the DymFileHeader class.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         filename : str
             Name of the DYM file.
 
-        Returns:
-        --------
+        Returns
+        -------
         None
         """
         super().__init__(filename, "DYM2")
@@ -106,7 +102,7 @@ class DymFileHeader(dym.DymFileHeader):
         try:
             with open(self.fileName_, "rb") as fo:
                 _extract_headers_values(self, fo)
-        except IOError as e:
+        except OSError as e:
             logging.error(f"read_header fails to read {e.fileName_}", exc_info=True)
             raise RuntimeError
         except Exception as e:
@@ -119,12 +115,12 @@ class DymFileHeader(dym.DymFileHeader):
 class DymFile(dym.DymFile):
     """Class representing a DYM2 data file."""
 
-    def __init__(self, filename):
+    def __init__(self, filename) -> None:
         """
         Initializes the DymFile class.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         filename : str
             The name of the DYM2 data file.
         """
