@@ -9,8 +9,7 @@ from typing import TYPE_CHECKING, Iterable
 
 import numpy as np
 import xarray as xr
-
-from dymfile.from_Inna_R import dymfile_tools
+from dymfile.core import dymfile_tools
 
 if TYPE_CHECKING:
     import io
@@ -254,6 +253,7 @@ def format_data(
     """
     ylat = ylat[:, 0]
     xlon = xlon[0, :]
+    time_vector = np.array(time_vector, dtype="datetime64[ns]")
 
     mask = xr.DataArray(
         mask,

@@ -5,12 +5,12 @@ if __name__ == "__main__":
         name="dymfile",
         author="Jules Lehodey",
         version="0.1",
-        package=["dymfile", "dymfile.code"],
+        package=["dymfile", "dymfile.core"],
         packages_dir={
             "dymfile": "src/dymfile",
             "dymfile.core": "src/dymfile/core",
         },
-        scripts=["src/dymfile/scripts/dymtonetcdf.py"],
+        scripts=["scripts/dymtonetcdf.py"],
         install_requires=[
             "numpy",
             "netCDF4",
@@ -18,5 +18,9 @@ if __name__ == "__main__":
             "plotly",
             "ipykernel",
             "matplotlib",
+            "cartopy",
+            "hvplot",
+            "geoviews",
+            "jupyter_bokeh",
         ],
     )

@@ -10,10 +10,12 @@ from typing import TYPE_CHECKING, Any
 import hvplot.xarray  # noqa: F401
 import xarray as xr
 
-from dymfile.from_Inna_R import dymfile_loading, dymfile_tools
+from dymfile.core import dymfile_loading, dymfile_tools
 
 if TYPE_CHECKING:
     import cartopy.crs as ccrs
+
+__all__ = ["Dymfile"]
 
 
 class Dymfile:

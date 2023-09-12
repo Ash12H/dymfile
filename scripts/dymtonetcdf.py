@@ -7,27 +7,8 @@ Usage: dymtonetcdf.py -i ./my_dym_file.dym -v my_variable_name -./new_netcdf_fil
 """
 
 import argparse
-import logging
-import time
 
-from dymfile.dym2todataarray import dym2_to_data_array
-
-
-def set_verbose(verbose: bool) -> None:
-    """
-    Set the script verbosity.
-
-    Parameters
-    ----------
-    verbose : bool
-        Whether or not to set the verbosity.
-    """
-    if verbose:
-        fmt = "%(asctime)s - %(filename)s - %(levelname)s - %(message)s"
-        logging.basicConfig(
-            format=fmt, level=logging.DEBUG, datefmt="%Y-%m-%d %H:%M:%S"
-        )
-        logging.Formatter.converter = time.gmtime
+from dymfile import Dymfile
 
 
 def usage() -> argparse.Namespace:
@@ -40,27 +21,39 @@ def usage() -> argparse.Namespace:
 
     parser.add_argument("--silent", "-s", help="Silent mode", action="store_true")
     parser.add_argument(
+        "--norm_lon",
+        "-l",
+        type=bool,
+        default=True,
+        help="Normalize the longitude coordinate between -180 and 180",
+    )
+    parser.add_argument(
+        "--delta_time",
+        "-t",
+        type=int,
+        default=30,
+        help="Delta time between two time steps in days",
+    )
+    parser.add_argument(
+        "--form_date",
+        "-d",
+        help="Format the date coordinate to datetime standard",
+        type=bool,
+        default=True,
+    )
+    parser.add_argument(
         "--infilepath",
         "-i",
         help="The path to the dymfile to convert",
         required=True,
     )
-    parser.add_argument("--varname", "-v", help="The variable name", required=True)
+    parser.add_argument("--varname", "-v", help="The variable name", required=False)
     parser.add_argument(
         "--outfilepath",
         "-o",
         help="The path to the generated netcdf file",
+        # TODO(Jules): may be removed if autocomputed  # noqa: TD003
         default="./output.nc",
-    )
-    parser.add_argument(
-        "--attributs",
-        "-a",
-        nargs="*",
-        help=(
-            "List of attributs you want to add to the netdcf file. Format is : "
-            'attribut_name="attribut content"'
-        ),
-        required=False,
     )
 
     return parser.parse_args()
@@ -73,20 +66,22 @@ def main() -> None:
     """
     args = usage()
 
-    set_verbose(not args.silent)
-
     infilepath = args.infilepath
     varname = args.varname
     outfilepath = args.outfilepath
-    attributs = None
-    if args.attributs is not None:
-        attributs = dict(data.split("=", maxsplit=1) for data in args.attributs)
+    norm_lon = args.norm_lon
+    form_date = args.form_date
+    delta_time = args.delta_time
 
-    dataarray = dym2_to_data_array(
-        infilepath=infilepath, varname=varname, attributs=attributs
+    dymfile = Dymfile.from_input(
+        infilepath,
+        normalize_longitude=norm_lon,
+        date_formating=form_date,
+        name=varname,
+        delta_time=delta_time,
     )
 
-    dataarray.to_netcdf(outfilepath)
+    dymfile.data.to_netcdf(outfilepath)
 
 
 if __name__ == "__main__":
