@@ -5,14 +5,16 @@ from __future__ import annotations
 import itertools
 import struct
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Iterable
+from typing import TYPE_CHECKING
 
 import numpy as np
 import xarray as xr
+
 from dymfile.core import dymfile_tools
 
 if TYPE_CHECKING:
     import io
+    from collections.abc import Iterable
 
 __all__ = ["loading", "format_data"]
 

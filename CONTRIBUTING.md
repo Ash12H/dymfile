@@ -2,8 +2,8 @@
 
 ## Hooks
 
+- Ruff
 - Black
-- Flake8
 
 Use pre-commit before submitting Pull Request. ([link](https://ljvmiranda921.github.io/notebook/2018/06/21/precommits-using-black-and-flake8/)).
 
@@ -41,6 +41,12 @@ To manage virtual environment with Pip, use the `requirement.txt` file as follow
 pip install -r requirements.txt
 ```
 
+To install Dymfile library :
+
+```bash
+pip install -e .
+```
+
 To export your environment use :
 
 ```bash
@@ -61,10 +67,10 @@ python -m unittest discover -s <directory>
 python -m unittest discover -p <pattern> 
 ```
 
-## Github actions
+## Run scripts
 
-Every time you will push your commit on the github repository, different workflows will be executed on serveurs.
+Example :
 
-- Lint : Black
-- Lint : Flake8
-- Test : Pytest
+```bash
+dymtonetcdf.py <args>
+```

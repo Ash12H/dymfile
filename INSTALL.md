@@ -23,8 +23,6 @@ pip install .
 
 ## Install the project as a developper
 
-
-
 Install :
 
 ```bash
