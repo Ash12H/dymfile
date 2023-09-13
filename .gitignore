@@ -13,3 +13,7 @@ __pycache__
 # Virtual environment
 .venv
 .conda
+
+# Dot files
+.ruff_cache
+
