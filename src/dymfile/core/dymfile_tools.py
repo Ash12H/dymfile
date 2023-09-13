@@ -7,13 +7,14 @@ import datetime
 import itertools
 import struct
 from collections import Counter
-from typing import TYPE_CHECKING, Any, Iterable
+from typing import TYPE_CHECKING, Any
 
 import cartopy.crs as ccrs
 import numpy as np
 
 if TYPE_CHECKING:
     import io
+    from collections.abc import Iterable
 
     import xarray as xr
 
@@ -183,6 +184,7 @@ def generate_name(
     data: xr.DataArray, name: str, units: str | None = None
 ) -> xr.DataArray:
     """Generate the name attributes for the data array."""
+    data.name = name
     attrs = {
         "standard_name": name,
         "long_name": name,
