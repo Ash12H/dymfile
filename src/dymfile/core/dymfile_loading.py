@@ -11,6 +11,7 @@ import numpy as np
 import xarray as xr
 
 from dymfile.core import dymfile_tools
+from dymfile.core.dymfile_tools import LabelsCoordinates
 
 if TYPE_CHECKING:
     import io
@@ -259,23 +260,27 @@ def format_data(
 
     mask = xr.DataArray(
         mask,
-        dims=("lat", "lon"),
-        coords={"lat": ylat, "lon": xlon},
+        dims=(LabelsCoordinates.latitude, LabelsCoordinates.longitude),
+        coords={LabelsCoordinates.latitude: ylat, LabelsCoordinates.longitude: xlon},
         name="mask",
     )
     data = xr.DataArray(
         data,
-        dims=("time", "lat", "lon"),
+        dims=("time", LabelsCoordinates.latitude, LabelsCoordinates.longitude),
         coords={
             "time": time_vector,
-            "lat": ylat,
-            "lon": xlon,
+            LabelsCoordinates.latitude: ylat,
+            LabelsCoordinates.longitude: xlon,
         },
     )
     data: xr.DataArray = xr.where(mask == 0, np.NAN, data)
-    data = data.transpose("time", "lat", "lon")
-    data = data.sortby(["time", "lat", "lon"])
-    mask = mask.sortby(["lat", "lon"])
+    data = data.transpose(
+        "time", LabelsCoordinates.latitude, LabelsCoordinates.longitude
+    )
+    data = data.sortby(
+        ["time", LabelsCoordinates.latitude, LabelsCoordinates.longitude]
+    )
+    mask = mask.sortby([LabelsCoordinates.latitude, LabelsCoordinates.longitude])
 
     data = dymfile_tools.generate_coordinates_attrs(data)
     data = dymfile_tools.generate_name(data, name, units)
