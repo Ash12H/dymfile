@@ -19,6 +19,14 @@ if TYPE_CHECKING:
     import xarray as xr
 
 
+class LabelsCoordinates:
+    """Names used by the Dymfile format for coordinates."""
+
+    latitude = "latitude"
+    longitude = "longitude"
+    time = "time"
+
+
 def get_date_sea(ndat: float) -> datetime.date:
     """
     Calculate the date in Seapodym format. Integer part is year and floating part is day
@@ -122,7 +130,13 @@ def normalize_longitude(data: xr.DataArray) -> xr.DataArray:
     xr.DataArray
         The DataArray with normalized longitude values.
     """
-    data = data.assign_coords(lon=(((data.lon + 180) % 360) - 180))
+    data = data.assign_coords(
+        {
+            LabelsCoordinates.longitude: (
+                ((data[LabelsCoordinates.longitude] + 180) % 360) - 180
+            )
+        }
+    )
     return data.sortby(list(data.coords.keys()))
 
 
@@ -152,11 +166,19 @@ def plot(data: xr.DataArray, projection: ccrs.Projection = None) -> Any:
     """Plots the data contained in the Dymfile as a quadmesh plot."""
     if projection is None:
         projection = ccrs.PlateCarree(central_longitude=0)
-    res = find_resolution(data.lon.data)
-    reindexed_data = data.reindex(lon=np.arange(data.lon[0], data.lon[-1] + res, res))
+    res = find_resolution(data[LabelsCoordinates.longitude].data)
+    reindexed_data = data.reindex(
+        {
+            LabelsCoordinates.longitude: np.arange(
+                data[LabelsCoordinates.longitude][0],
+                data[LabelsCoordinates.longitude][-1] + res,
+                res,
+            )
+        }
+    )
     return reindexed_data.hvplot.quadmesh(
-        x="lon",
-        y="lat",
+        x=LabelsCoordinates.longitude,
+        y=LabelsCoordinates.latitude,
         geo=True,
         cmap="viridis",
         coastline=True,
@@ -167,12 +189,16 @@ def plot(data: xr.DataArray, projection: ccrs.Projection = None) -> Any:
 
 def generate_coordinates_attrs(data: xr.DataArray) -> xr.DataArray:
     """Generate the coordinates attributes for the data array."""
-    data.coords["lon"] = data.lon.assign_attrs(
+    data.coords[LabelsCoordinates.longitude] = data[
+        LabelsCoordinates.longitude
+    ].assign_attrs(
         standard_name="longitude",
         long_name="longitude",
         units="degrees_east",
     )
-    data.coords["lat"] = data.lat.assign_attrs(
+    data.coords[LabelsCoordinates.latitude] = data[
+        LabelsCoordinates.latitude
+    ].assign_attrs(
         standard_name="latitude",
         long_name="latitude",
         units="degrees_north",
