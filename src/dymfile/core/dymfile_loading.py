@@ -273,7 +273,7 @@ def format_data(
             LabelsCoordinates.longitude: xlon,
         },
     )
-    data: xr.DataArray = xr.where(mask == 0, np.NAN, data)
+    data: xr.DataArray = xr.where(mask == 0, np.nan, data)
     data = data.transpose(
         "time", LabelsCoordinates.latitude, LabelsCoordinates.longitude
     )

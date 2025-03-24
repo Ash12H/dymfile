@@ -1,45 +1,23 @@
-# LINT SECTION
-
-[tool.black]
-line-length = 88
-include = '\.pyi?$'
-exclude = '''
-/(
-    .git
-)/
-'''
-
-[tool.ruff]
-select = [
-    "E","F","W","C90","I","N","D","UP","YTT","ANN","ASYNC",
-    "S","BLE","FBT","B","A","COM","C4","DTZ","T10","DJ","EM",
-    "EXE","FA","ISC","ICN","G","INP","PIE","T20","PYI","PT",
-    "Q","RSE","RET","SLF","SIM","TID","TCH","INT","ARG","PTH",
-    "TD","ERA","PD","PGH","PLC","PLE","PLR","PLW","TRY","FLY",
-    "NPY","AIR","RUF", "UP007", "B905", 
+[project]
+name = "dymfile"
+version = "0.1.0"
+description = "Manage DYM file format from SEAPODYM project."
+authors = [{ name = "Ash", email = "lehodey.jules@gmail.com" }]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "numpy (>=2.2.4,<3.0.0)",
+    "netcdf4 (>=1.7.2,<2.0.0)",
+    "xarray (>=2025.3.0,<2026.0.0)",
+    "ipykernel (>=6.29.5,<7.0.0)",
+    "matplotlib (>=3.10.1,<4.0.0)",
+    "cartopy (>=0.24.1,<0.25.0)",
+    "hvplot (>=0.11.2,<0.12.0)",
+    "geoviews (>=1.14.0,<2.0.0)",
+    "jupyter-bokeh (>=4.0.5,<5.0.0)",
 ]
 
-# Since xarray use .isnull function Rule PD004 cannot be used
-ignore = ["D212", "D203", "D401", "D205", "COM812","S314", "PD004", "ANN401"]
-line-length = 88
-exclude = [
-    ".eggs",
-    ".git",
-    ".venv",
-    "__pypackages__",
-    "build",
-    "test",
-    "__init__.py",
-    "setup.py"
-]
-[tool.ruff.mccabe]
-# Unlike Flake8, default to a complexity level of 10.
-max-complexity = 10
-[tool.ruff.pylint]
-# 5 is too restrictive for class initialization
-max-args = 7
 
-# SYSTEM SECTION
 [build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
