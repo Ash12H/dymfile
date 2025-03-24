@@ -1,9 +1,0 @@
-numpy
-netCDF4
-xarray
-ipykernel
-matplotlib
-cartopy
-hvplot
-geoviews
-jupyter_bokeh

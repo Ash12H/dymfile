@@ -1,7 +1,0 @@
-name: dymfile
-channels:
-  - conda-forge
-dependencies:
-  - numpy
-  - netcdf4
-  - xarray
