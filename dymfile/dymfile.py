@@ -2,22 +2,19 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 import io
-from functools import singledispatchmethod
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
 
-import hvplot.xarray  # noqa: F401
 import xarray as xr
 
 from dymfile.core import dymfile_loading, dymfile_tools
 
-if TYPE_CHECKING:
-    import cartopy.crs as ccrs
 
 __all__ = ["Dymfile"]
 
 
+@dataclass
 class Dymfile:
     """
     Represents a Dymfile object.
@@ -34,15 +31,14 @@ class Dymfile:
 
     Methods
     -------
-    __init__:
-        Initializes a Dymfile object. Use Xarray.DataArray objects for data and mask.
-    from_input:
-        Load a Dymfile from an input source. Use either a filepath or a buffer wich
-        correspond to a Dymfile.
-    plot_data:
-        Plots the data contained in the Dymfile as a quadmesh plot.
-    plot_mask:
-        Plots the mask contained in the Dymfile.
+    from_filepath(filepath: str, delta_time: int = 30, name: str | None = None,
+                  units: str | None = None, normalize_longitude: bool = False,
+                  date_formating: bool = True) -> Dymfile
+        Load a Dymfile from a filepath.
+    from_buffer(buffer: bytes, delta_time: int = 30, name: str | None = None,
+                  units: str | None = None, normalize_longitude: bool = False,
+                  date_formating: bool = True) -> Dymfile
+        Load a Dymfile from a buffer of bytes.
 
     Parameters
     ----------
@@ -70,71 +66,31 @@ class Dymfile:
     >>> dymfile_from_file = Dymfile.from_input(filepath, normalize_longitude=True)
     """
 
-    def __init__(
-        self: Dymfile,
-        data: xr.DataArray,
-        mask: xr.DataArray,
-        *,
-        normalize_longitude: bool = False,
-    ) -> None:
+    data: xr.DataArray
+    mask: xr.DataArray
+    normalize_longitude: bool = False
+
+    def __post_init__(self: Dymfile) -> None:
         """
-        Initializes a Dymfile object.
+        Post-initialization method to ensure that the data and mask are xarray DataArrays.
 
-        Parameters
-        ----------
-        data : xr.DataArray
-            An xarray DataArray representing the data.
-        mask : xr.DataArray
-            An xarray DataArray representing the mask.
-        normalize_longitude : bool, optional
-            Whether to normalize the longitude. Defaults to False.
-
-        Notes
-        -----
-        If `normalize_longitude` is True, the longitude is normalized using the
-        `dymfile_tools.normalize_longitude()` function.
+        Raises
+        ------
+        TypeError
+            If `data` or `mask` is not an instance of xarray.DataArray.
         """
-        with xr.set_options(keep_attrs=True):
-            if normalize_longitude:
-                data = dymfile_tools.normalize_longitude(data)
-            dymfile_tools.normalize_longitude(data)
-            self.data = data
-            self.mask = mask
+        if not isinstance(self.data, xr.DataArray):
+            raise TypeError("data must be an instance of xarray.DataArray")
+        if not isinstance(self.mask, xr.DataArray):
+            raise TypeError("mask must be an instance of xarray.DataArray")
 
-    @singledispatchmethod
+        if self.normalize_longitude:
+            with xr.set_options(keep_attrs=True):
+                self.data = dymfile_tools.normalize_longitude(self.data)
+                self.mask = dymfile_tools.normalize_longitude(self.mask)
+
     @classmethod
-    def from_input(
-        cls: Dymfile,
-        input_source: bytes | str,  # noqa: ARG003
-        delta_time: int = 30,  # noqa: ARG003
-        *,
-        name: str | None = None,  # noqa: ARG003
-        normalize_longitude: bool = False,  # noqa: ARG003
-        date_formating: bool = True,  # noqa: ARG003
-    ) -> Dymfile:
-        """
-        Load a Dymfile from an input source. Input can be a filepath or a buffer of
-        bytes.
-
-        Parameters
-        ----------
-        input_source : str | bytes
-            The input source to load the Dymfile from.
-        delta_time : int, optional
-            The time delta, by default 30 (Monthly).
-        date_formating : bool, optional
-            Whether to format dates (to datetime), by default True.
-        normalize_longitude : bool, optional
-            Whether to normalize the longitude (between [-180, 180]), by default False.
-        name : str | None, optional
-            The name of the Dymfile, by default None.
-        """
-        error_message = "Unsupported input source"
-        raise NotImplementedError(error_message)
-
-    @from_input.register(str)
-    @classmethod
-    def _from_filepath(
+    def from_filepath(
         cls: Dymfile,
         filepath: str,
         delta_time: int = 30,
@@ -166,9 +122,8 @@ class Dymfile:
         )
         return Dymfile(data, mask, normalize_longitude=normalize_longitude)
 
-    @from_input.register(bytes)
     @classmethod
-    def _from_buffer(
+    def from_buffer(
         cls: Dymfile,
         buffer: bytes,
         delta_time: int = 30,
@@ -199,11 +154,3 @@ class Dymfile:
             data, mask, time_vector, xlon, ylat, name, units
         )
         return Dymfile(data, mask, normalize_longitude=normalize_longitude)
-
-    def plot_data(self: Dymfile, projection: ccrs.Projection = None) -> Any:
-        """Plots the data contained in the Dymfile as a quadmesh plot."""
-        return dymfile_tools.plot(self.data, projection=projection)
-
-    def plot_mask(self: Dymfile) -> Any:
-        """Plots the mask contained in the Dymfile as a quadmesh plot."""
-        return self.mask.plot()
