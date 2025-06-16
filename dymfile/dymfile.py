@@ -63,7 +63,7 @@ class Dymfile:
 
     >>> # Load a Dymfile from a filepath
     >>> filepath = "/path/to/dymfile.nc"
-    >>> dymfile_from_file = Dymfile.from_input(filepath, normalize_longitude=True)
+    >>> dymfile_from_file = Dymfile.from_filepath(filepath, normalize_longitude=True)
     """
 
     data: xr.DataArray

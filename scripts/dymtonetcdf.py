@@ -3,7 +3,7 @@
 A script which convert a DYM file into a NetCDF.
 
 Usage: dymtonetcdf.py -i ./my_dym_file.dym -v my_variable_name -./new_netcdf_file.nc -a
-    unit="meter" origin="country_X"
+    unit="meter"
 """
 
 import argparse
@@ -73,7 +73,7 @@ def main() -> None:
     form_date = args.form_date
     delta_time = args.delta_time
 
-    dymfile = Dymfile.from_input(
+    dymfile: Dymfile = Dymfile.from_filepath(
         infilepath,
         normalize_longitude=norm_lon,
         date_formating=form_date,
