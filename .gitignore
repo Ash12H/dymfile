@@ -17,3 +17,4 @@ __pycache__
 # Dot files
 .ruff_cache
 
+dist

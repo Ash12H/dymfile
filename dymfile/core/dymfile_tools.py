@@ -6,16 +6,12 @@ from __future__ import annotations
 import datetime
 import itertools
 import struct
-from collections import Counter
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
-import cartopy.crs as ccrs
 import numpy as np
 
 if TYPE_CHECKING:
     import io
-    from collections.abc import Iterable
-
     import xarray as xr
 
 
@@ -138,53 +134,6 @@ def normalize_longitude(data: xr.DataArray) -> xr.DataArray:
         }
     )
     return data.sortby(list(data.coords.keys()))
-
-
-def find_resolution(array: Iterable) -> float:
-    """
-    Finds the most common difference between consecutive elements in the given array.
-
-    Parameters
-    ----------
-    array : Iterable
-        The input array.
-
-    Returns
-    -------
-    float
-        The most common difference between consecutive elements in the array.
-        Returns None if the array is empty.
-    """
-    differences = [array[i + 1] - array[i] for i in range(len(array) - 1)]
-    difference_counts = Counter(differences)
-    most_common_difference = difference_counts.most_common(1)
-    return most_common_difference[0][0] if most_common_difference else None
-
-
-# return type is Any due to the many different possibilities
-def plot(data: xr.DataArray, projection: ccrs.Projection = None) -> Any:
-    """Plots the data contained in the Dymfile as a quadmesh plot."""
-    if projection is None:
-        projection = ccrs.PlateCarree(central_longitude=0)
-    res = find_resolution(data[LabelsCoordinates.longitude].data)
-    reindexed_data = data.reindex(
-        {
-            LabelsCoordinates.longitude: np.arange(
-                data[LabelsCoordinates.longitude][0],
-                data[LabelsCoordinates.longitude][-1] + res,
-                res,
-            )
-        }
-    )
-    return reindexed_data.hvplot.quadmesh(
-        x=LabelsCoordinates.longitude,
-        y=LabelsCoordinates.latitude,
-        geo=True,
-        cmap="viridis",
-        coastline=True,
-        widget_location="bottom",
-        projection=projection,
-    )
 
 
 def generate_coordinates_attrs(data: xr.DataArray) -> xr.DataArray:
