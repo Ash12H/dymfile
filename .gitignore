@@ -2,10 +2,13 @@
 build
 data/*
 notebook
+dist
 
 # Python system
 __pycache__
 *.egg-info*
+*.pyc
+*.pyo
 
 # Mac
 .DS_Store
@@ -14,6 +17,33 @@ __pycache__
 .venv
 .conda
 
-# Dot files
+# uv
+uv.lock
+.python-version
+
+# Ruff
 .ruff_cache
+
+# Pytest
+.pytest_cache
+.coverage
+htmlcov/
+coverage.xml
+
+# Pyright
+.pyright/
+pyrightconfig.json
+
+# MkDocs
+site/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+Thumbs.db
 
