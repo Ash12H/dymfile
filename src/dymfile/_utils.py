@@ -116,9 +116,7 @@ def gen_monthly_dates(t0: list[int], tfin: list[int]) -> np.ndarray:
     return np.array(dates, dtype="datetime64")
 
 
-def iter_unpack_numbers(
-    buf_format: str, buffer: bytes
-) -> np.ndarray:
+def iter_unpack_numbers(buf_format: str, buffer: bytes) -> np.ndarray:
     """
     Unpack numbers from binary buffer.
 

@@ -103,7 +103,9 @@ def dym_to_dataset_main() -> None:
             if args.compression != "none":
                 for var in ds.data_vars:
                     encoding[var] = {"zlib": True, "complevel": 4}
-            ds.to_netcdf(output_path, encoding=encoding if args.compression != "none" else None)
+            ds.to_netcdf(
+                output_path, encoding=encoding if args.compression != "none" else None
+            )
             print(f"✓ Converted to NetCDF: {output_path}")
         elif args.format == "zarr":
             ds.to_zarr(output_path, mode="w")

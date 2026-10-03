@@ -8,7 +8,9 @@ import pytest
 import xarray as xr
 
 
-@pytest.mark.skip(reason="Backend entrypoint registration issue - needs package reinstall")
+@pytest.mark.skip(
+    reason="Backend entrypoint registration issue - needs package reinstall"
+)
 def test_backend_open_dataset(sample_dym_file: Path) -> None:
     """Test opening DYM file via xarray backend."""
     ds = xr.open_dataset(sample_dym_file, engine="dym")
@@ -32,7 +34,9 @@ def test_backend_guess_can_open() -> None:
     assert not backend.guess_can_open("file.zarr")
 
 
-@pytest.mark.skip(reason="Backend entrypoint registration issue - needs package reinstall")
+@pytest.mark.skip(
+    reason="Backend entrypoint registration issue - needs package reinstall"
+)
 def test_backend_with_options(sample_dym_file: Path) -> None:
     """Test backend with custom options."""
     ds = xr.open_dataset(
