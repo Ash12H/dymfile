@@ -5,13 +5,24 @@ from __future__ import annotations
 from pathlib import Path
 
 import numpy as np
-import pytest
+import xarray as xr
 
 from dymfile.reader import dym_to_dataset, read_dym
-from dymfile.writer import dataset_to_dym, write_dym
+from dymfile.writer import DYM_FORMAT_ID, dataset_to_dym, write_dym
 
 
-@pytest.mark.skip(reason="Writer dimensions need adjustment")
+def _grid() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """A small field on a grid given from south to north, with land and a gap."""
+    rng = np.random.default_rng(0)
+    longitude = np.array([120.0, 122.0, 124.0, 126.0])
+    latitude = np.array([-2.0, 0.0, 2.0])
+    time = 2020.0 + (np.arange(3) + 0.5) / 12.0
+    data = rng.uniform(15.0, 30.0, (3, 3, 4))
+    mask = np.array([[1, 1, 0, 3], [2, 3, 3, 0], [3, 3, 3, 3]], dtype=np.int32)
+    data[1, 2, 1] = np.nan
+    return data, longitude, latitude, time, mask
+
+
 def test_roundtrip_basic(sample_dym_file: Path, tmp_dym_file: Path) -> None:
     """Test read -> write -> read round-trip."""
     # Read original
@@ -53,7 +64,6 @@ def test_roundtrip_basic(sample_dym_file: Path, tmp_dym_file: Path) -> None:
     )
 
 
-@pytest.mark.skip(reason="Writer dimensions need adjustment")
 def test_roundtrip_dataset(sample_dym_file: Path, tmp_dym_file: Path) -> None:
     """Test Dataset round-trip using high-level API."""
     # Read as dataset
@@ -78,3 +88,57 @@ def test_roundtrip_dataset(sample_dym_file: Path, tmp_dym_file: Path) -> None:
             equal_nan=True,
             rtol=1e-5,
         )
+
+
+def test_header_carries_the_format_identifier(tmp_dym_file: Path) -> None:
+    """The file starts with DYM2, then a function identifier, then the data's range."""
+    data, longitude, latitude, time, mask = _grid()
+    write_dym(tmp_dym_file, data, longitude, latitude, time, mask)
+
+    raw = tmp_dym_file.read_bytes()
+    assert raw[:4] == DYM_FORMAT_ID
+    minval, maxval = np.frombuffer(raw, "<f4", 2, 8)
+    valid = data[:, mask > 0]
+    assert minval == np.float32(np.nanmin(valid))
+    assert maxval == np.float32(np.nanmax(valid))
+
+
+def test_rows_are_written_from_north_to_south(tmp_dym_file: Path) -> None:
+    """A grid given from south to north is written reversed, data and mask with it."""
+    data, longitude, latitude, time, mask = _grid()
+    write_dym(tmp_dym_file, data, longitude, latitude, time, mask)
+
+    reread = read_dym(tmp_dym_file)
+    np.testing.assert_array_equal(reread.latitude, latitude[::-1])
+    np.testing.assert_array_equal(reread.mask, mask[::-1, :])
+    sea = mask[::-1, :] > 0
+    np.testing.assert_allclose(
+        reread.data[:, sea], data[:, ::-1, :][:, sea], rtol=1e-6, equal_nan=True
+    )
+
+
+def test_dataset_roundtrip_in_any_dimension_order(tmp_dym_file: Path) -> None:
+    """A dataset reads back the same, whatever the order of its dimensions."""
+    data, longitude, latitude, time, mask = _grid()
+    field = xr.DataArray(
+        data,
+        dims=("time", "latitude", "longitude"),
+        coords={"time": time, "latitude": latitude, "longitude": longitude},
+    ).where(mask > 0)
+    ds = xr.Dataset(
+        {
+            "temperature": field.transpose("latitude", "longitude", "time"),
+            "mask": xr.DataArray(mask, dims=("latitude", "longitude")).T,
+        }
+    )
+    dataset_to_dym(ds, tmp_dym_file, variable="temperature")
+
+    reread = dym_to_dataset(tmp_dym_file, decode_times=False)
+    order = ("time", "latitude", "longitude")
+    np.testing.assert_allclose(
+        reread[tmp_dym_file.stem].transpose(*order).values,
+        field.transpose(*order).values,
+        rtol=1e-6,
+        equal_nan=True,
+    )
+    np.testing.assert_array_equal(reread["mask"].values, mask)

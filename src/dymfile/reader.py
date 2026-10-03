@@ -44,7 +44,8 @@ def _read_header(file: io.BufferedReader | io.BytesIO) -> DymHeader:
     DymHeader
         Parsed header information.
     """
-    # Skip first 12 bytes (3 floats/ints - unknown purpose)
+    # Skip the format identifier, the function identifier, and the minimum
+    # and maximum of the data
     file.read(4)
     struct.unpack("i", file.read(4))
     struct.unpack("f", file.read(4))

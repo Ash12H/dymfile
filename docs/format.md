@@ -7,7 +7,9 @@ The DYM format is a binary file format used by the SEAPODYM project to store oce
 A DYM file consists of:
 
 1. **Header** (36 bytes)
-   - Unknown fields (16 bytes)
+   - format identifier: `DYM2` (4 bytes, characters)
+   - function identifier (4 bytes, int32)
+   - minimum and maximum of the valid data (4 bytes each, float32)
    - nlon: number of longitude points (4 bytes, int32)
    - nlat: number of latitude points (4 bytes, int32)
    - nlevel: number of time levels (4 bytes, int32)
@@ -46,5 +48,7 @@ For monthly data (default), times are centered on the 15th of each month.
 
 - All multi-byte values are in little-endian format
 - Coordinates form a regular grid (though stored as 2D arrays)
+- Rows run from north to south. SEAPODYM reads them in that order without checking the latitudes, so the writer orders them so
+- SEAPODYM copies the format identifier into the files it writes, so a file without one makes its outputs unreadable
 - The mask is mandatory in the file format
 - Data values of -999 are treated as missing/invalid

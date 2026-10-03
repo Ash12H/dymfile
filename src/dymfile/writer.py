@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from dymfile._formats import DymData, DymHeader
+from dymfile._formats import DymHeader
 from dymfile._utils import LabelsCoordinates
 
 if TYPE_CHECKING:
@@ -19,11 +19,18 @@ if TYPE_CHECKING:
 __all__ = ["write_dym", "dataset_to_dym"]
 
 DYM_INVALID_VALUE = -999
+DYM_FORMAT_ID = b"DYM2"
 
 
-def _write_header(file: io.BufferedWriter, header: DymHeader) -> None:
+def _write_header(
+    file: io.BufferedWriter, header: DymHeader, minval: float, maxval: float
+) -> None:
     """
     Write DYM file header.
+
+    SEAPODYM copies the format identifier of the files it reads into the
+    files it writes, as a C string. An empty identifier makes its outputs
+    four bytes short, and unreadable.
 
     Parameters
     ----------
@@ -31,12 +38,15 @@ def _write_header(file: io.BufferedWriter, header: DymHeader) -> None:
         File object to write to.
     header : DymHeader
         Header information to write.
+    minval : float
+        Smallest valid value of the data.
+    maxval : float
+        Largest valid value of the data.
     """
-    # Write unknown header bytes (matching reader format)
-    file.write(struct.pack("i", 0))  # Unknown int
-    file.write(struct.pack("i", 0))  # Unknown int
-    file.write(struct.pack("f", 0.0))  # Unknown float
-    file.write(struct.pack("f", 0.0))  # Unknown float
+    file.write(DYM_FORMAT_ID)
+    file.write(struct.pack("i", 0))  # Function identifier
+    file.write(struct.pack("f", minval))
+    file.write(struct.pack("f", maxval))
 
     # Write dimensions and time bounds
     file.write(struct.pack("i", header.nlon))
@@ -95,9 +105,7 @@ def _write_coordinates_and_mask(
             file.write(struct.pack("i", int(val)))
 
 
-def _write_data(
-    file: io.BufferedWriter, data: np.ndarray, mask: np.ndarray
-) -> None:
+def _write_data(file: io.BufferedWriter, data: np.ndarray, mask: np.ndarray) -> None:
     """
     Write data array to DYM file.
 
@@ -111,7 +119,7 @@ def _write_data(
         Mask array with shape (nlat, nlon).
         Used to set land points to invalid value.
     """
-    nlevel, nlat, nlon = data.shape
+    nlevel, nlat, _ = data.shape
 
     # Replace NaN with invalid value
     data_out = data.copy()
@@ -151,7 +159,8 @@ def write_dym(
     longitude : np.ndarray
         Longitude array (nlon,).
     latitude : np.ndarray
-        Latitude array (nlat,).
+        Latitude array (nlat,), in either order. Rows are written from
+        north to south, the order SEAPODYM reads them in.
     time : np.ndarray
         Time array (nlevel,) in SEAPODYM float format.
     mask : np.ndarray | None
@@ -175,9 +184,13 @@ def write_dym(
 
     # Validate shapes
     if len(longitude) != nlon:
-        raise ValueError(f"longitude length {len(longitude)} doesn't match data nlon={nlon}")
+        raise ValueError(
+            f"longitude length {len(longitude)} doesn't match data nlon={nlon}"
+        )
     if len(latitude) != nlat:
-        raise ValueError(f"latitude length {len(latitude)} doesn't match data nlat={nlat}")
+        raise ValueError(
+            f"latitude length {len(latitude)} doesn't match data nlat={nlat}"
+        )
     if len(time) != nlevel:
         raise ValueError(f"time length {len(time)} doesn't match data nlevel={nlevel}")
 
@@ -185,7 +198,21 @@ def write_dym(
     if mask is None:
         mask = np.ones((nlat, nlon), dtype=np.int32)
     elif mask.shape != (nlat, nlon):
-        raise ValueError(f"mask shape {mask.shape} doesn't match data (nlat={nlat}, nlon={nlon})")
+        raise ValueError(
+            f"mask shape {mask.shape} doesn't match data (nlat={nlat}, nlon={nlon})"
+        )
+
+    # SEAPODYM reads rows from north to south and does not check the
+    # latitudes, so a grid given from south to north is written reversed.
+    if nlat > 1 and latitude[0] < latitude[-1]:
+        latitude = latitude[::-1]
+        data = data[:, ::-1, :]
+        mask = mask[::-1, :]
+
+    valid = data[:, mask > 0]
+    valid = valid[np.isfinite(valid)]
+    minval = float(valid.min()) if valid.size else 0.0
+    maxval = float(valid.max()) if valid.size else 0.0
 
     # Create header
     if t0 is None:
@@ -203,7 +230,7 @@ def write_dym(
 
     # Write file
     with filepath.open("wb") as file:
-        _write_header(file, header)
+        _write_header(file, header, minval, maxval)
         _write_coordinates_and_mask(file, longitude, latitude, time, mask)
         _write_data(file, data, mask)
 
@@ -246,7 +273,7 @@ def dataset_to_dym(
             data_vars.remove("mask")
         if not data_vars:
             raise ValueError("Dataset only contains mask variable")
-        variable = data_vars[0]
+        variable = str(data_vars[0])
 
     if variable not in ds:
         raise ValueError(f"Variable {variable!r} not found in dataset")
@@ -259,8 +286,9 @@ def dataset_to_dym(
     if missing_coords:
         raise ValueError(f"Missing required coordinates: {missing_coords}")
 
-    # Extract arrays
-    data = data_var.values  # shape: (nlevel, nlat, nlon)
+    # Extract arrays, whatever the order of the dimensions
+    lat, lon = LabelsCoordinates.latitude, LabelsCoordinates.longitude
+    data = data_var.transpose("time", lat, lon).values
     longitude = ds[LabelsCoordinates.longitude].values
     latitude = ds[LabelsCoordinates.latitude].values
     time_coord = ds["time"]
@@ -278,7 +306,7 @@ def dataset_to_dym(
 
     # Extract or create mask
     if "mask" in ds:
-        mask = ds["mask"].values.astype(np.int32)
+        mask = ds["mask"].transpose(lat, lon).values.astype(np.int32)
     else:
         # Create mask from non-NaN values
         mask = (~np.isnan(data[0, :, :])).astype(np.int32)
